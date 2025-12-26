@@ -5,7 +5,15 @@ import requests
 import dash_leaflet as dl
 from dash import Dash, html, dcc, Output, Input, State, no_update
 
+# No Render Blueprint, API_URL pode vir como "topo-smart-parser-backend" (sem protocolo)
 API_URL = os.getenv("API_URL", "http://backend:8000").rstrip("/")
+if API_URL and not API_URL.startswith("http"):
+    # Se não tem protocolo e termina com .onrender.com, é público https
+    if ".onrender.com" in API_URL:
+        API_URL = f"https://{API_URL}"
+    else:
+        # Senão assume-se interno do Render (porta 8000)
+        API_URL = f"http://{API_URL}:8000"
 
 app = Dash(__name__)
 server = app.server
