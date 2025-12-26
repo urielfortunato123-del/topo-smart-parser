@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import List, Tuple, Optional
 
 import pdfplumber
+import pytesseract
+from PIL import Image
 
 # Heurística simples e prática:
 # - captura pares numéricos com separador ponto ou vírgula
@@ -25,7 +27,7 @@ class ParsedPDF:
     lonlat_points: List[Tuple[float, float]]
     hint: str  # "utm" | "lonlat" | "unknown"
 
-def extract_text(pdf_path: str) -> str:
+def extract_text_from_pdf(pdf_path: str) -> str:
     text_parts = []
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
@@ -33,6 +35,17 @@ def extract_text(pdf_path: str) -> str:
             if t.strip():
                 text_parts.append(t)
     return "\n".join(text_parts)
+
+def extract_text_from_image(img_path: str) -> str:
+    return pytesseract.image_to_string(Image.open(img_path))
+
+def extract_text(file_path: str) -> str:
+    ext = file_path.lower().split(".")[-1]
+    if ext == "pdf":
+        return extract_text_from_pdf(file_path)
+    elif ext in ("png", "jpg", "jpeg", "bmp", "tiff"):
+        return extract_text_from_image(file_path)
+    return ""
 
 def parse_points_from_text(text: str) -> ParsedPDF:
     utm = []

@@ -10,13 +10,14 @@ app = Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
-    html.H2("PDF → Polígono (KML/KMZ/DXF)"),
-    html.Div("Suba o PDF e o sistema já extrai e gera os arquivos."),
+    html.H2("Topografia Inteligente (PDF/Imagem → Polígono)"),
+    html.Div("Suba o arquivo (PDF ou Imagem) e o sistema já extrai e gera os arquivos."),
     dcc.Upload(
         id="upload",
-        children=html.Div(["Arraste o PDF aqui ou clique para selecionar"]),
+        children=html.Div(["Arraste o arquivo aqui ou clique para selecionar"]),
         style={"width": "100%", "padding": "20px", "border": "2px dashed #999", "marginTop": "10px"},
-        multiple=False
+        multiple=False,
+        accept="application/pdf, image/*"
     ),
     html.Div([
         dcc.Input(id="utm_zone", type="number", placeholder="UTM zone (ex: 23)", style={"marginRight":"10px"}),
@@ -64,7 +65,8 @@ def process(n, contents, filename, utm_zone, force_mode):
     if not contents:
         return "Envie um PDF primeiro.", "", [], no_update, {"display": "none"}
 
-    _, b64 = contents.split(",", 1)
+    head, b64 = contents.split(",", 1)
+    mime = head.split(";")[0].split(":")[1]
     pdf_bytes = base64.b64decode(b64)
 
     cfg = {
@@ -74,7 +76,7 @@ def process(n, contents, filename, utm_zone, force_mode):
         "force_mode": (force_mode or None)
     }
 
-    files = {"file": (filename, pdf_bytes, "application/pdf")}
+    files = {"file": (filename, pdf_bytes, mime)}
     data = {"cfg": json.dumps(cfg)}
 
     r = requests.post(f"{API_URL}/upload", files=files, data=data, timeout=120)
