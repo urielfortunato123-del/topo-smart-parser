@@ -1,10 +1,11 @@
+import os
 import base64
 import json
 import requests
 import dash_leaflet as dl
 from dash import Dash, html, dcc, Output, Input, State, no_update
 
-API_URL = "http://backend:8000"  # no docker-compose; no Render você troca para URL pública
+API_URL = os.getenv("API_URL", "http://backend:8000").rstrip("/")
 
 app = Dash(__name__)
 server = app.server

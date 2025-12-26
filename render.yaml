@@ -22,6 +22,6 @@ services:
         fromService:
           name: topo-smart-parser-backend
           type: web
-          property: host
+          property: url
       - key: PORT
         value: 8050
